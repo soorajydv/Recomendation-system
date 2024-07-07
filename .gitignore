@@ -1,0 +1,5 @@
+myenv/
+/dataset.csv
+/db.sqlite3
+/mongodb.py
+recomendation.py
