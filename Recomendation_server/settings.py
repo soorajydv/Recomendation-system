@@ -44,7 +44,7 @@ ROOT_URLCONF = 'Recomendation_server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -60,8 +60,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Recomendation_server.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'course',
+        'ENFORCE_SCHEMA': True,
+        'CLIENT': {
+            'host': 'mongodb://localhost:27017/',
+        }
+    }
+}
 
 DATABASES = {
     'default': {

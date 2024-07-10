@@ -1,44 +1,54 @@
-from django.http import JsonResponse
-from .models import Enrolledcourse, Course  # Ensure Course model is imported
-
+import pymongo
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from django.http import JsonResponse
+from django.shortcuts import render
+from .models import Enrolledcourse
+
+# Establish connection to MongoDB
+client = pymongo.MongoClient('mongodb://localhost:27017/')
+db = client['course']
+courses_collection = db['courses']
 
 def fetchEnrollment(request, userid):
-    enrollments = Enrolledcourse.objects.filter(userid=userid)
-    all_courses = Course.objects.all()
+    if client:
+        print("MongoDb Connected")
 
-    if enrollments.exists() and all_courses.exists():
-        # Create a list to hold all enrollment details
+    # Fetch enrollments from PostgreSQL
+    enrollments = Enrolledcourse.objects.filter(userid=userid).values()
+
+    if enrollments.exists():
         enrollment_details = []
-        
-        for enrollment in enrollments:
-            details = {
-                'userId': enrollment.userid.id,
-                'userName': enrollment.userid.fullname,
-                'courseId': enrollment.courseid.id,
-                'courseName': enrollment.courseid.title,
-                'courseCategory': enrollment.courseid.coursecategoryid.name,
-                'courseDescription': enrollment.courseid.description,
-                'objective': enrollment.courseid.objective,
-                'requirement': enrollment.courseid.requirement,
-                'syllabus': enrollment.courseid.syllabus
-            }
-            enrollment_details.append(details)
 
-        # Create a list to hold all course details
+        for enrollment in enrollments:
+            course_id = enrollment['courseid_id']  # Get the course ID from the enrollment
+            course = courses_collection.find_one({'courseId': course_id})
+
+            if course:
+                details = {
+                    'userId': enrollment['userid_id'],
+                    'courseId': course['courseId'],
+                    'courseName': course['title'],
+                    'courseDescription': course['description'],
+                    'objective': course['objective'],
+                    'requirement': course['requirement'],
+                    'sections': course['sections'],
+                    'titleVideoLink': course['titleVideoLink']
+                }
+                enrollment_details.append(details)
+
         course_details = []
-        
-        for course in all_courses:
+
+        for course in courses_collection.find():
             details = {
-                'courseId': course.id,
-                'courseName': course.title,
-                'courseCategory': course.coursecategoryid.name,
-                'courseDescription': course.description,
-                'objective': course.objective,
-                'requirement': course.requirement,
-                'syllabus': course.syllabus
+                'courseId': course['courseId'],
+                'courseName': course['title'],
+                'courseDescription': course['description'],
+                'objective': course['objective'],
+                'requirement': course['requirement'],
+                'sections': course['sections'],
+                'titleVideoLink': course['titleVideoLink']
             }
             course_details.append(details)
 
@@ -46,17 +56,18 @@ def fetchEnrollment(request, userid):
         df_user_courses = pd.DataFrame(enrollment_details)
         df_all_courses = pd.DataFrame(course_details)
 
+        # Debug: Print columns of the DataFrame to verify column names
+        print("Columns in df_user_courses:", df_user_courses.columns)
+        print("Columns in df_all_courses:", df_all_courses.columns)
+
         # Fill missing values with empty strings
         df_all_courses = df_all_courses.fillna('')
 
         # Combine relevant text fields into a single feature for all courses
         df_all_courses['content'] = (
             df_all_courses['courseName'] + " " +
-            df_all_courses['courseCategory'] + " " +
-            df_all_courses['courseDescription'] + " " +
             df_all_courses['objective'] + " " +
-            df_all_courses['requirement'] + " " +
-            df_all_courses['syllabus']
+            df_all_courses['requirement']
         )
 
         # TF-IDF Vectorizer and Cosine Similarity on all courses
@@ -79,12 +90,23 @@ def fetchEnrollment(request, userid):
             # Get the top recommended courses indices excluding user's own courses
             recommended_course_indices = [i[0] for i in sim_scores if df_all_courses.iloc[i[0]]['courseId'] not in user_courses]
             
-            # Return the top 10 recommended courses
-            return df_all_courses.iloc[recommended_course_indices][:5]['courseName'].tolist()
-        
+            # Return the top 3 recommended courses
+            return df_all_courses.iloc[recommended_course_indices][:3]['courseName'].tolist()
+
         # Example usage
         recommendations = get_recommendations(userid, df_user_courses, df_all_courses, cosine_sim)
         
         return JsonResponse({'recommendations': recommendations})
     else:
-        return JsonResponse({'error': 'Enrollment or Courses Not Found'})
+        return JsonResponse({'error': 'No enrollments found for this user'})
+
+
+
+def course_list(request):
+    # Fetch all documents from the 'courses' collection and convert the cursor to a list
+    courses = list(courses_collection.find())
+
+    # Render the template with the courses data
+    return render(request, 'courses/course_list.html', {'courses': courses})
+
+
