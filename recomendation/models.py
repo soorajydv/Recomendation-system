@@ -1,9 +1,3 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remov` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
@@ -16,6 +10,7 @@ class Cart(models.Model):
     ischeckout = models.BooleanField(db_column='isCheckout')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Cart'
 
 
@@ -23,6 +18,7 @@ class Conversation(models.Model):
     createdat = models.DateTimeField(db_column='createdAt')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Conversation'
 
 
@@ -47,6 +43,7 @@ class Course(models.Model):
     titlevideo = models.TextField(db_column='titleVideo', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Course'
 
 
@@ -55,6 +52,7 @@ class Coursecategory(models.Model):
     coursedomainid = models.ForeignKey('Coursedomain', models.DO_NOTHING, db_column='courseDomainId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'CourseCategory'
 
 
@@ -62,6 +60,7 @@ class Coursedomain(models.Model):
     name = models.TextField()
 
     class Meta:
+        managed = False
         db_table = 'CourseDomain'
 
 
@@ -73,6 +72,7 @@ class Coursereview(models.Model):
     courseid = models.ForeignKey(Course, models.DO_NOTHING, db_column='courseId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'CourseReview'
 
 
@@ -83,6 +83,7 @@ class Coursereviewreply(models.Model):
     idcoursereview = models.IntegerField(db_column='idCourseReview')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'CourseReviewReply'
 
 
@@ -92,6 +93,7 @@ class Enrolledcourse(models.Model):
     enrolledat = models.DateTimeField(db_column='enrolledAt')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'EnrolledCourse'
 
 
@@ -100,6 +102,7 @@ class Game(models.Model):
     coursecategoryid = models.ForeignKey(Coursecategory, models.DO_NOTHING, db_column='courseCategoryId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Game'
 
 
@@ -109,6 +112,7 @@ class Gameview(models.Model):
     viewtime = models.TextField(db_column='viewTime')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'GameView'
 
 
@@ -118,6 +122,7 @@ class Gamificationdata(models.Model):
     gameid = models.ForeignKey(Game, models.DO_NOTHING, db_column='gameId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'GamificationData'
 
 
@@ -132,6 +137,7 @@ class Message(models.Model):
         db_table = 'Message'
 
 
+
 class Oauthuser(models.Model):
     fullname = models.TextField(db_column='fullName')  # Field name made lowercase.
     email = models.TextField()
@@ -140,6 +146,7 @@ class Oauthuser(models.Model):
     oauthprovider = models.TextField(db_column='oauthProvider', blank=True, null=True)  # Field name made lowercase. This field type is a guess.
 
     class Meta:
+        managed = False
         db_table = 'OAuthUser'
 
 
@@ -152,6 +159,7 @@ class Payment(models.Model):
     createdat = models.DateTimeField(db_column='createdAt')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Payment'
 
 
@@ -163,6 +171,7 @@ class Qna(models.Model):
     courseid = models.ForeignKey(Course, models.DO_NOTHING, db_column='courseId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'QnA'
 
 
@@ -173,7 +182,18 @@ class Qnareply(models.Model):
     idqna = models.IntegerField(db_column='idQnA')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'QnAReply'
+
+
+class Searchhistory(models.Model):
+
+    userid = models.ForeignKey('User', models.DO_NOTHING, db_column='userId')  # Field name made lowercase.
+    query = models.TextField()
+
+    class Meta:
+        managed = True
+        db_table = 'SearchHistory'
 
 
 class Socialhandle(models.Model):
@@ -187,6 +207,7 @@ class Socialhandle(models.Model):
     oauthuserid = models.ForeignKey(Oauthuser, models.DO_NOTHING, db_column='oAuthUserId')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'SocialHandle'
 
 
@@ -197,6 +218,7 @@ class Transaction(models.Model):
     createdat = models.DateTimeField(db_column='createdAt')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = 'Transaction'
 
 
@@ -212,6 +234,7 @@ class User(models.Model):
     oauthprovider = models.TextField(db_column='oauthProvider', blank=True, null=True)  # Field name made lowercase. This field type is a guess.
 
     class Meta:
+        managed = False
         db_table = 'User'
 
 
@@ -220,6 +243,7 @@ class Conversationtouser(models.Model):
     b = models.ForeignKey(User, models.DO_NOTHING, db_column='B')  # Field name made lowercase.
 
     class Meta:
+        managed = False
         db_table = '_ConversationToUser'
         unique_together = (('a', 'b'),)
 
@@ -235,4 +259,5 @@ class PrismaMigrations(models.Model):
     applied_steps_count = models.IntegerField()
 
     class Meta:
+        managed = False
         db_table = '_prisma_migrations'

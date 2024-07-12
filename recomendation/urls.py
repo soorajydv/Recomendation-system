@@ -1,9 +1,7 @@
-from .views import course_list, fetchEnrollment
+from .views import fetchEnrollment,recomendationFromSearch
 from django.urls import path
 
 urlpatterns = [
     path('enrollment/<int:userid>/', fetchEnrollment, name='search'),
-    path('courses/', course_list, name='course_list'),
-    # path('roadmap/<int:userid>/', generate_roadmap, name='roadmap'),
-    
+    path('searchrecomendation/<int:userid>/', recomendationFromSearch, name='searchrecomendation')
 ]
